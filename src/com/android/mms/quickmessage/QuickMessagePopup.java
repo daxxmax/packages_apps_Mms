@@ -77,6 +77,7 @@ import com.android.mms.R;
 import com.android.mms.data.Contact;
 import com.android.mms.data.Conversation;
 import com.android.mms.templates.TemplatesProvider.Template;
+import com.android.mms.themes.ThemesMessageList;
 import com.android.mms.transaction.MessagingNotification;
 import com.android.mms.transaction.MessagingNotification.NotificationInfo;
 import com.android.mms.transaction.SmsMessageSender;
@@ -749,7 +750,8 @@ public class QuickMessagePopup extends Activity implements
 
         if (!TextUtils.isEmpty(message)) {
             SmileyParser parser = SmileyParser.getInstance();
-            CharSequence smileyBody = parser.addSmileySpansRecv(message);
+            int recv = prefs.getInt(ThemesMessageList.PREF_RECV_SMILEY, 0xff33b5e5);
+            CharSequence smileyBody = parser.addSmileySpans(message, recv);
             if (enableEmojis) {
                 EmojiParser emojiParser = EmojiParser.getInstance();
                 smileyBody = emojiParser.addEmojiSpans(smileyBody);

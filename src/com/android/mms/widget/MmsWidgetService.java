@@ -318,7 +318,7 @@ public class MmsWidgetService extends RemoteViewsService {
                 // into the remote view.
                 SmileyParser parser = SmileyParser.getInstance();
                 remoteViews.setTextViewText(R.id.subject,
-                        addColor(parser.addSmileySpans(conv.getSnippet()),
+                        addColor(parser.addSmileySpans(conv.getSnippet(), 0xffcfcfcf),
                         conv.hasUnreadMessages() ? SUBJECT_TEXT_COLOR_UNREAD :
                         SUBJECT_TEXT_COLOR_READ));
 

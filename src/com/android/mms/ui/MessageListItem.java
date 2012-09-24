@@ -710,15 +710,17 @@ public class MessageListItem extends LinearLayout implements
         boolean hasSubject = !TextUtils.isEmpty(subject);
         SmileyParser parser = SmileyParser.getInstance();
         EmojiParser emojiParser = EmojiParser.getInstance();
+        int smileySentColor = sp.getInt(ThemesMessageList.PREF_SENT_SMILEY, 0xff33b5e5);
+        int smileyRecvColor = sp.getInt(ThemesMessageList.PREF_RECV_SMILEY, 0xff33b5e5);
         if (hasSubject) {
             CharSequence smilizedSubject;
             if (mMessageItem.getBoxId() == 1) {
-                smilizedSubject = parser.addSmileySpansRecv(subject);
+                smilizedSubject = parser.addSmileySpans(subject, smileyRecvColor);
                 if (enableEmojis) {
                     smilizedSubject = emojiParser.addEmojiSpans(smilizedSubject);
                 }
             } else {
-                smilizedSubject = parser.addSmileySpansSent(subject);
+                smilizedSubject = parser.addSmileySpans(subject, smileySentColor);
                 if (enableEmojis) {
                     smilizedSubject = emojiParser.addEmojiSpans(smilizedSubject);
                 }
@@ -741,12 +743,12 @@ public class MessageListItem extends LinearLayout implements
                     buf.append(" - ");
                 }
                 if (mMessageItem.getBoxId() == 1) {
-                    smileyBody = parser.addSmileySpansRecv(body);
+                    smileyBody = parser.addSmileySpans(body, smileyRecvColor);
                     if (enableEmojis) {
                         smileyBody = emojiParser.addEmojiSpans(smileyBody);
                     }
                 } else {
-                    smileyBody = parser.addSmileySpansSent(body);
+                    smileyBody = parser.addSmileySpans(body, smileySentColor);
                     if (enableEmojis) {
                         smileyBody = emojiParser.addEmojiSpans(smileyBody);
                     }
