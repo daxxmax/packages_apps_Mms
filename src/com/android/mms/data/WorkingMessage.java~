@@ -42,7 +42,6 @@ import android.util.Pair;
 
 import com.android.common.contacts.DataUsageStatUpdater;
 import com.android.common.userhappiness.UserHappinessSignals;
-import com.android.mms.ContentRestrictionException;
 import com.android.mms.ExceedMessageSizeException;
 import com.android.mms.LogTag;
 import com.android.mms.MmsApp;
@@ -57,7 +56,6 @@ import com.android.mms.transaction.MessageSender;
 import com.android.mms.transaction.MmsMessageSender;
 import com.android.mms.transaction.SmsMessageSender;
 import com.android.mms.ui.ComposeMessageActivity;
-import com.android.mms.ui.MessagingPreferenceActivity;
 import com.android.mms.ui.MessageUtils;
 import com.android.mms.ui.SlideshowEditor;
 import com.android.mms.util.DraftCache;
@@ -471,23 +469,26 @@ public class WorkingMessage {
         mStatusListener.onAttachmentChanged();  // have to call whether succeeded or failed,
                                                 // because a replace that fails, removes the slide
 
-        if (!append && mAttachmentType == TEXT && type == TEXT) {
-            int[] params = SmsMessage.calculateLength(getText(), false);
-            /* SmsMessage.calculateLength returns an int[4] with:
-             *   int[0] being the number of SMS's required,
-             *   int[1] the number of code units used,
-             *   int[2] is the number of code units remaining until the next message.
-             *   int[3] is the encoding type that should be used for the message.
-             */
-            int smsSegmentCount = params[0];
+        if (!MmsConfig.getMultipartSmsEnabled()) {
+            if (!append && mAttachmentType == TEXT && type == TEXT) {
+                int[] params = SmsMessage.calculateLength(getText(), false);
+                /* SmsMessage.calculateLength returns an int[4] with:
+                *   int[0] being the number of SMS's required,
+                *   int[1] the number of code units used,
+                *   int[2] is the number of code units remaining until the next message.
+                *   int[3] is the encoding type that should be used for the message.
+                */
+                int msgCount = params[0];
 
-            if (!MmsConfig.getMultipartSmsEnabled()) {
-                // The provider doesn't support multi-part sms's so as soon as the user types
-                // an sms longer than one segment, we have to turn the message into an mms.
-                setLengthRequiresMms(smsSegmentCount > 1, false);
+                if (msgCount > 1) {
+                    // The provider doesn't support multi-part sms's so as soon as the user types
+                    // an sms longer than one segment, we have to turn the message into an mms.
+                    setLengthRequiresMms(true, false);
+                } else {
+                    updateState(HAS_ATTACHMENT, hasAttachment(), true);
+                }
             } else {
-                int threshold = MmsConfig.getSmsToMmsTextThreshold();
-                setLengthRequiresMms(threshold > 0 && smsSegmentCount > threshold, false);
+                updateState(HAS_ATTACHMENT, hasAttachment(), true);
             }
         } else {
             // Set HAS_ATTACHMENT if we need it.
@@ -1028,14 +1029,8 @@ public class WorkingMessage {
 
         mConversation = conv;
 
-    Context context = mActivity;
-
-        // Convert to MMS if there are any email addresses or multiple recipients in the recipient list.
-    if (conv.getRecipients().size() > 1 && MessagingPreferenceActivity.getGroupMMSEnabled(context)){
-      setGroupTextMms(true, false);
-    } else {
-            setHasEmail(conv.getRecipients().containsEmail(), false);
-    }
+        // Convert to MMS if there are any email addresses in the recipient list.
+        setHasEmail(conv.getRecipients().containsEmail(), false);
     }
 
     public Conversation getConversation() {
@@ -1069,10 +1064,6 @@ public class WorkingMessage {
     */
     public void setLengthRequiresMms(boolean mmsRequired, boolean notify) {
         updateState(LENGTH_REQUIRES_MMS, mmsRequired, notify);
-    }
-   
-    public void setGroupTextMms(boolean mmsRequired, boolean notify) {
-        updateState(RECIPIENTS_REQUIRE_MMS, mmsRequired, notify);
     }
 
     private static String stateString(int state) {
