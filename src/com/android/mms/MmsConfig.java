@@ -80,11 +80,19 @@ public class MmsConfig {
     // indicate the message will be sent as an mms.
     private static boolean mEnableMultipartSMS = true;
 
+<<<<<<< HEAD
     // By default, the radio splits multipart sms, not the application. If the carrier or radio
     // does not support this, and the recipient gets garbled text, set this to true. If this is
     // true and mEnableMultipartSMS is false, the mSmsToMmsTextThreshold will be observed,
     // converting to mms if we reach the required number of segments.
     private static boolean mEnableSplitSMS = false;
+=======
+    // If mEnableMultipartSMS is true and mSmsToMmsTextThreshold > 1, then multi-part SMS messages
+    // will be converted into a single mms message. For example, if the mms_config.xml file
+    // specifies <int name="smsToMmsTextThreshold">4</int>, then on the 5th sms segment, the
+    // message will be converted to an mms.
+    private static int mSmsToMmsTextThreshold = -1;
+>>>>>>> 5e4d93a07404ec685644260c08e445879307fe1f
 
     private static boolean mEnableSlideDuration = true;
     private static boolean mEnableMMSReadReports = true;        // key: "enableMMSReadReports"
@@ -119,6 +127,7 @@ public class MmsConfig {
     public static int getSmsToMmsTextThreshold() {
         return mSmsToMmsTextThreshold;
     }
+<<<<<<< HEAD
     public static void setSmsToMmsTextThreshold(int threshold) {
         mSmsToMmsTextThreshold = threshold;
     }
@@ -128,6 +137,8 @@ public class MmsConfig {
     public static int getSmsToMmsTextThresholdMax() {
         return mSmsToMmsTextThresholdMax;
     }
+=======
+>>>>>>> 5e4d93a07404ec685644260c08e445879307fe1f
 
     public static boolean getMmsEnabled() {
         return mMmsEnabled;
